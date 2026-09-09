@@ -10,17 +10,21 @@ agent 繁忙时，输入框的回车会把下一条消息排进队列，而排�
 
 ## 安装
 
-```sh
-dsh plugin --profile web add dsh-queue-first-enter
-```
+从 GitHub 安装：
 
-然后重启 `dsh web`。
+```sh
+dsh plugin --profile web add github:himeope/dsh-queue-first-enter
+```
 
 从本地检出安装：
 
 ```sh
 dsh plugin --profile web add /path/to/dsh-queue-first-enter
 ```
+
+然后重启 `dsh web`。
+
+本插件只通过本仓库分发，**没有发布到 npm**，所以直接写包名（`dsh plugin --profile web add dsh-queue-first-enter`）解析不到。因为是 git 源安装，pnpm 可能拦截它的 `prepare` 脚本；如果 `dsh plugin` 打印了 `allowBuilds` 提示，把它给出的键加到 profile 的 `pnpm-workspace.yaml` 里再跑一次即可。这个包没有构建步骤，脚本被拦截也不影响使用。
 
 需要 `dsh web` 0.1.0-rc.6 或更新版本。浏览器半边是 `dsh.client` 包（`platform: web`）；宿主半边不带任何行为，只是为了让这个包成为一行正常可安装的插件。
 

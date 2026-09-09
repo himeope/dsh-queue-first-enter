@@ -10,17 +10,21 @@ While an agent is busy, the composer's Enter key queues the next message. A queu
 
 ## Install
 
+From GitHub:
+
 ```sh
-dsh plugin --profile web add dsh-queue-first-enter
+dsh plugin --profile web add github:himeope/dsh-queue-first-enter
 ```
 
-Then restart `dsh web`.
-
-Installing from a checkout instead:
+From a local checkout:
 
 ```sh
 dsh plugin --profile web add /path/to/dsh-queue-first-enter
 ```
+
+Then restart `dsh web`.
+
+The package is distributed through this repository only — it is not published to npm, so `dsh plugin --profile web add dsh-queue-first-enter` (the bare name) will not resolve. Because the plugin is git-hosted, pnpm may block its `prepare` script; if `dsh plugin` prints an `allowBuilds` hint, add the key it names to the profile's `pnpm-workspace.yaml` and re-run. This package has no build step, so a blocked script is harmless.
 
 Requires `dsh web` 0.1.0-rc.6 or newer. The browser half is a `dsh.client` bundle (`platform: web`); the host half contributes no behavior and exists so the package is a normal installable plugin row.
 
