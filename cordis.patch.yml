@@ -1,0 +1,6 @@
+# dsh bundle patch: inserts dsh-queue-first-enter into a profile's layer stack.
+# The browser half arrives through package.json's dsh.client declaration
+# (platform: web); this row only mounts the host half.
+- insert:
+    - id: queue-first-enter
+      name: dsh-queue-first-enter

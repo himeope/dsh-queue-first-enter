@@ -1,0 +1,59 @@
+{
+  "name": "dsh-queue-first-enter",
+  "version": "1.0.0",
+  "description": "DSH Web plugin: pressing Enter with an empty composer immediately steers the first queued message into the running turn.",
+  "type": "module",
+  "main": "index.js",
+  "exports": {
+    ".": "./index.js",
+    "./client": "./client.js",
+    "./cordis.patch.yml": "./cordis.patch.yml",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "index.js",
+    "client.js",
+    "cordis.patch.yml",
+    "screenshots.json",
+    "README.md",
+    "README.zh.md",
+    "LICENSE"
+  ],
+  "keywords": [
+    "dsh",
+    "deepseek-harness",
+    "dsh-plugin",
+    "queue",
+    "steer",
+    "composer",
+    "enter-key"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/himeope/dsh-queue-first-enter.git"
+  },
+  "homepage": "https://github.com/himeope/dsh-queue-first-enter#readme",
+  "bugs": {
+    "url": "https://github.com/himeope/dsh-queue-first-enter/issues"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "test": "node smoke-test.mjs",
+    "check": "node --check client.js && node --check index.js"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "inject": ["@deepseek-ai/dsh-client-runtime"],
+      "platform": "web"
+    }
+  },
+  "peerDependencies": {
+    "@deepseek-ai/dsh-client-runtime": ">=0.0.1-rc.5 <0.1.0 || >=0.1.0-rc.1 <0.2.0-0"
+  }
+}
