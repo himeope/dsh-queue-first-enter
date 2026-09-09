@@ -6,7 +6,7 @@ A DeepSeek Harness (dsh) Web plugin: **with an empty composer, pressing Enter im
 
 While an agent is busy, the composer's Enter key queues the next message. A queued message normally waits for the current turn to end. This plugin adds one gesture: clear the composer, press Enter, and the **first** queued message is steered into the running turn at its next step boundary — the rest of the queue keeps its order.
 
-![Settings row](assets/screenshot-settings.png)
+![Settings row](assets/screenshot-settings.en.png)
 
 ## Install
 
@@ -49,7 +49,9 @@ Convergence: if the turn ends in the same instant (`steer-unavailable`) or the a
 
 ## Settings
 
-**Settings → General → "回车立即发送队列首条"** — a switch directly below dsh's own "繁忙时 Enter 键行为" row.
+**Settings → General → "Enter sends the first queued message"** — a switch directly below dsh's own "Enter key while busy" row.
+
+The row's label and description follow the product's interface language: with the interface set to English they read as above, with 简体中文 they read **「回车立即发送队列首条」**. The switch itself has no per-locale state — only the copy changes.
 
 The preference lives in browser `localStorage` under `dsh.queueFirstEnter.enabled` (default: on).
 
@@ -60,11 +62,11 @@ The preference lives in browser `localStorage` under `dsh.queueFirstEnter.enable
 | `index.js` | Host half. Contributes no host behavior; exists so the package is mountable. |
 | `client.js` | Browser half. Registers the composer listener and the settings row through the client slot system. |
 | `cordis.patch.yml` | Inserts the host row into the profile's layer stack. |
-| `smoke-test.mjs` | Loads `client.js` against a stubbed module system and Cordis context, then asserts both slot registrations. |
+| `smoke-test.mjs` | Loads `client.js` against a stubbed module system and Cordis context, then asserts both slot registrations, the zh/en dictionaries, and that the row copy follows the active locale. |
 
-The listener is attached in the capture phase to the composer's own `textarea`, located by walking up from the plugin's own anchor element inside the composer card — no product CSS class or absolute DOM path is used. It reads the authoritative `session/queue` snapshot and calls the existing `updateQueue(itemId, { kind: 'steer' })` RPC; it does not send prompts of its own, does not touch the network, and stores nothing beyond the on/off flag.
+The listener is attached in the capture phase to the composer's own `textarea`, located by walking up from the plugin's own anchor element inside the composer card — no product CSS class or absolute DOM path is used. It reads the authoritative `session/queue` snapshot and calls the existing `updateQueue(itemId, { kind: 'steer' })` RPC; it does not send prompts of its own, does not touch the network, and stores nothing beyond the on/off flag. Copy is registered as a `dsh-queue-first-enter` locale namespace in both shipped locales (`zh`, `en`) and read through the client locale service, so it follows the interface language and re-renders on a switch.
 
-The screenshot above is rendered from `screenshots/settings-mockup.html`, a static mock of the Settings → General panel that reuses the shipped row geometry and the plugin's own inline styles. Open it in a browser to see exactly what the row renders.
+The screenshots above are rendered from `screenshots/settings-mockup.html` and `screenshots/settings-mockup.en.html`, static mocks of the Settings → General panel that reuse the shipped row geometry and the plugin's own inline styles. Open either in a browser to see exactly what the row renders.
 
 ```sh
 npm test          # node smoke-test.mjs

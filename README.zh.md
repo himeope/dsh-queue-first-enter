@@ -51,6 +51,8 @@ dsh plugin --profile web add /path/to/dsh-queue-first-enter
 
 **设置 → 通用 → 「回车立即发送队列首条」**，就在 dsh 自带的「繁忙时 Enter 键行为」下面一行。
 
+这一行的标题和说明**跟随产品界面语言**：界面切成 English 时显示 `Enter sends the first queued message`，切成简体中文时显示上面那行中文。开关本身没有分语言的状态，只有文案跟着变。
+
 开关状态存在浏览器 `localStorage` 的 `dsh.queueFirstEnter.enabled`（默认开启）。
 
 ## 实现说明
@@ -60,11 +62,11 @@ dsh plugin --profile web add /path/to/dsh-queue-first-enter
 | `index.js` | 宿主半边：不带宿主行为，只为让包可挂载。 |
 | `client.js` | 浏览器半边：通过客户端 slot 系统注册输入框监听与设置行。 |
 | `cordis.patch.yml` | 把宿主行插进 profile 的层栈。 |
-| `smoke-test.mjs` | 用桩模块系统和桩 Cordis 上下文加载 `client.js`，断言两个 slot 都注册成功。 |
+| `smoke-test.mjs` | 用桩模块系统和桩 Cordis 上下文加载 `client.js`，断言两个 slot 都注册成功、中英文词条都注册、且设置行文案跟随当前语言。 |
 
-监听器以捕获阶段挂在输入框自己的 `textarea` 上，定位方式是插件自己的锚点元素向上找到 composer 卡片再取其中的 `textarea`——没有使用产品 CSS 类名，也没有写死 DOM 路径。它读取权威的 `session/queue` 快照，调用已有的 `updateQueue(itemId, { kind: 'steer' })` RPC；自己不发 prompt、不访问网络，除开关状态外不存储任何东西。
+监听器以捕获阶段挂在输入框自己的 `textarea` 上，定位方式是插件自己的锚点元素向上找到 composer 卡片再取其中的 `textarea`——没有使用产品 CSS 类名，也没有写死 DOM 路径。它读取权威的 `session/queue` 快照，调用已有的 `updateQueue(itemId, { kind: 'steer' })` RPC；自己不发 prompt、不访问网络，除开关状态外不存储任何东西。文案以 `dsh-queue-first-enter` 命名空间注册到产品自带的两种语言（`zh`、`en`），通过客户端 locale 服务读取，因此跟随界面语言，切换语言时即时重渲染。
 
-上面的截图由 `screenshots/settings-mockup.html` 渲染而来：这是一个静态的设置 → 通用面板模拟，复用了产品自带的设置行尺寸和插件自身的行内样式。用浏览器打开它，就能看到这一行真实渲染的样子。
+上面的截图由 `screenshots/settings-mockup.html` 和 `screenshots/settings-mockup.en.html` 渲染而来：这是设置 → 通用面板的静态模拟，复用了产品自带的设置行尺寸和插件自身的行内样式。用浏览器打开它们，就能看到这一行真实渲染的样子。
 
 ```sh
 npm test          # node smoke-test.mjs

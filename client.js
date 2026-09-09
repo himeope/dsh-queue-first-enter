@@ -72,6 +72,48 @@ if (!loader || typeof loader.load !== "function") {
       if (!slots) return;
       var sessions = ctx.get("sessions");
 
+      // --- 文案：跟随产品当前语言（设置 → 通用 里能切换 中文/English） ---
+      var NS = "dsh-queue-first-enter";
+      var DICT = {
+        zh: {
+          "title": "回车立即发送队列首条",
+          "desc": "开启后：输入框空白且队列有待发消息时，按 Enter 立刻把队列第一条插话发送到当前回合；Ctrl/Cmd+Enter 的「插话全部」行为不变。",
+          "on": "已开启",
+          "off": "已关闭",
+          "steerFailed": "发送队列首条失败",
+        },
+        en: {
+          "title": "Enter sends the first queued message",
+          "desc": "When the composer is empty and the queue holds pending messages, Enter immediately steers the first one into the running turn. Ctrl/Cmd+Enter still steers the whole queue.",
+          "on": "On",
+          "off": "Off",
+          "steerFailed": "Could not send the first queued message",
+        },
+      };
+
+      var locale = ctx.get("locale");
+      var t = function (key) {
+        var table = DICT.zh;
+        try {
+          if (locale !== undefined && locale.getLocale().active === "en") table = DICT.en;
+        } catch (error) {}
+        return table[key] !== undefined ? table[key] : key;
+      };
+
+      if (locale !== undefined) {
+        try {
+          // 未声明命名空间的单语言注册形式；注册失败不影响功能，只影响文案语言。
+          ctx.effect(function () {
+            var offZh = locale.register(NS, "zh", DICT.zh);
+            var offEn = locale.register(NS, "en", DICT.en);
+            return function () {
+              offZh();
+              offEn();
+            };
+          }, "dsh-queue-first-enter: dictionaries");
+        } catch (error) {}
+      }
+
       var currentSessionId;
 
       function sessionOf(sessionId) {
@@ -93,11 +135,11 @@ if (!loader || typeof loader.load !== "function") {
           var code = result && result.error ? result.error.code : undefined;
           if (code === "steer-unavailable" || code === "queue-item-not-found") return;
           try {
-            console.warn("[dsh-queue-first-enter] 发送队列首条失败：", code || "unknown");
+            console.warn("[dsh-queue-first-enter] " + t("steerFailed") + ": " + (code || "unknown"));
           } catch (e) {}
         }, function (error) {
           try {
-            console.warn("[dsh-queue-first-enter] 发送队列首条异常：", error);
+            console.warn("[dsh-queue-first-enter] " + t("steerFailed") + ": " + error);
           } catch (e) {}
         });
       }
@@ -170,9 +212,15 @@ if (!loader || typeof loader.load !== "function") {
       // 因此样式注入不可用时开关依然可见。
       function QueueFirstEnterRow() {
         var enabled = React.useState(state.enabled);
+        var localeRev = React.useState(0);
         React.useEffect(function () {
           var off = state.subscribe(function (next) { enabled[1](next); });
           return off;
+        }, []);
+        React.useEffect(function () {
+          // 语言切换后重渲染这一行（t 在渲染时读取当前语言）。
+          if (locale === undefined) return undefined;
+          return locale.subscribe(function () { localeRev[1](function (value) { return value + 1; }); });
         }, []);
 
         // 与产品自带设置行（EnterBehaviorRow）对齐：16px 内边距、l2 边框、
@@ -238,11 +286,11 @@ if (!loader || typeof loader.load !== "function") {
           React.createElement(
             "div",
             { className: "dsh-qfe-text", style: textStyle },
-            React.createElement("div", { className: "dsh-qfe-title", style: titleStyle }, "回车立即发送队列首条"),
+            React.createElement("div", { className: "dsh-qfe-title", style: titleStyle }, t("title")),
             React.createElement(
               "div",
               { className: "dsh-qfe-desc", style: descStyle },
-              "开启后：输入框空白且队列有待发消息时，按 Enter 立刻把队列第一条插话发送到当前回合；Ctrl/Cmd+Enter 的「插话全部」行为不变。"
+              t("desc")
             )
           ),
           React.createElement(
@@ -253,8 +301,8 @@ if (!loader || typeof loader.load !== "function") {
               style: toggleStyle,
               role: "switch",
               "aria-checked": on ? "true" : "false",
-              "aria-label": "回车立即发送队列首条",
-              title: on ? "已开启" : "已关闭",
+              "aria-label": t("title"),
+              title: on ? t("on") : t("off"),
               onClick: function () { state.set(!on); },
             },
             React.createElement("span", { className: "dsh-qfe-knob", style: knobStyle })
