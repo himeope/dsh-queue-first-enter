@@ -18,8 +18,9 @@ if (!loader || typeof loader.load !== "function") {
     var module = { exports: {} };
     var exports = module.exports;
 
-    // 两个服务都用 ctx.get 可选读取：宿主组合里没有时插件安静降级，不进入等待。
-    var inject = [];
+    // 声明需要的服务：dsh 0.1.5 的客户端装载器按 inject 列表把可用服务挂到 ctx，
+    // 不声明的话 ctx.get("slots"/"sessions"/"locale") 都拿不到，设置行和输入框监听就不会注册。
+    var inject = ["slots", "sessions", "locale"];
 
     // React 由 DSH 模块系统提供；动态/独立插件都可能拿不到，拿不到就静默降级。
     var React = null;
