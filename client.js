@@ -164,8 +164,18 @@ if (!loader || typeof loader.load !== "function") {
           var card = anchor.closest("[data-composer-card]");
           var host = card || anchor.parentElement;
           if (!host) return undefined;
-          var area = host.querySelector("textarea");
+          // 0.1.5 起输入框是 contenteditable（Lexical 的 <div data-composer-input>），
+          // 老版本是 <textarea>；两个都选上。
+          var area = host.querySelector("textarea, [data-composer-input]");
           if (!area) return undefined;
+
+          function editableText(el) {
+            if (!el) return "";
+            try {
+              if (el.tagName === "TEXTAREA" || el.tagName === "INPUT") return el.value || "";
+              return el.textContent || "";
+            } catch (e) { return ""; }
+          }
 
           function onKeyDown(event) {
             if (!state.enabled) return;
@@ -175,7 +185,9 @@ if (!loader || typeof loader.load !== "function") {
 
             var current = stateRef.current;
             if (!current || current.phase !== "plain") return;
-            if (current.draft.trim() !== "" || current.imageCount > 0) return;
+            // 实时读当前输入内容（contenteditable 用 textContent），确保是空白才插话
+            var liveDraft = editableText(area).trim();
+            if (liveDraft !== "" || current.imageCount > 0) return;
 
             var session = sessionOf(current.sessionId);
             if (!session) return;
