@@ -1,6 +1,6 @@
 {
   "name": "dsh-queue-first-enter",
-  "version": "1.0.3",
+  "version": "1.1.0",
   "description": "DSH Web plugin: pressing Enter with an empty composer immediately steers the first queued message into the running turn.",
   "type": "module",
   "main": "index.js",
@@ -54,6 +54,9 @@
     }
   },
   "peerDependencies": {
-    "@deepseek-ai/dsh-client-runtime": ">=0.0.1-rc.5 <0.1.0 || >=0.1.0-rc.1 <0.2.0-0"
+    "@deepseek-ai/dsh-client-runtime": ">=0.0.1-rc.5 <0.1.0 || >=0.1.0-rc.1 <0.3.0-0"
   }
 }
+
+
+

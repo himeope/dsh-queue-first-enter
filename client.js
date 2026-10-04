@@ -55,13 +55,25 @@ if (!loader || typeof loader.load !== "function") {
       else if (saved === "1") state.enabled = true;
     } catch (e) {}
 
-    /** 读一条快照的队首待发消息 id；没有就返回 undefined。 */
+    /** 读队首待发消息 id；没有就返回 undefined。兼容两种队列读取面：
+     *  dsh 0.2.0 起走 session.projections.faceOf("inbox")["next-turn"]，
+     *  旧版(session.getSnapshot().queue)作为兜底。 */
     function firstQueuedId(session) {
       if (!session) return undefined;
-      var snapshot = session.getSnapshot();
-      var queue = snapshot.queue || [];
-      for (var i = 0; i < queue.length; i++) {
-        if (queue[i].placement === "queued") return queue[i].id;
+      var items = [];
+      try {
+        var inbox = session.projections && session.projections.faceOf ?
+          session.projections.faceOf("inbox") : undefined;
+        if (inbox && inbox.getSnapshot) {
+          var nt = inbox.getSnapshot()["next-turn"];
+          if (Array.isArray(nt)) items = nt;
+        }
+      } catch (e) {}
+      if (items.length === 0 && session.getSnapshot && session.getSnapshot().queue) {
+        items = session.getSnapshot().queue;
+      }
+      for (var i = 0; i < items.length; i++) {
+        if (items[i] && items[i].id) return items[i].id;
       }
       return undefined;
     }
